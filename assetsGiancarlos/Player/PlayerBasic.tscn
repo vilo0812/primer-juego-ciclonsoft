@@ -1,0 +1,105 @@
+[gd_scene load_steps=6 format=3 uid="uid://ytkk8kqmo3mh"]
+
+[ext_resource type="Texture2D" uid="uid://dmox6e28kf6ax" path="res://assets(prestados)/sprites/Players/Player_4.png" id="1_hrh0a"]
+
+[sub_resource type="GDScript" id="GDScript_l1474"]
+script/source = "extends CharacterBody2D
+
+@export var speed:= 600.0
+const JUMP_VELOCITY:= -550.0
+var is_facing_right:= true
+var jump_cont: int = 0
+var optionJump=1
+
+func _physics_process(delta):
+	
+	#Linea exclusiva para el salto doble o multiple
+	if is_on_floor():
+		jump_cont = 1
+		
+	#aquí se determina el tipo de salto
+	if optionJump == 1:
+		doubelJump()
+	elif optionJump == 2:
+		multipleJump()
+	else:
+		multipleJump()
+		
+	#Caida del personaje tras saltar y avitar la aceleración infinita por salto
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	move_x()
+	flip()
+	move_and_slide()
+	
+#Funcion para salto individual
+func jumpOnlyOne():
+	# Acción de saltar y limitar saltos en el aire.
+	if Input.is_action_just_pressed(\"move_jump\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+
+
+#Funcion para salto doble
+func doubelJump():
+	#Acción de saltar dos veces
+	if Input.is_action_just_pressed(\"move_jump\") and jump_cont < 3:
+		velocity.y = JUMP_VELOCITY
+		jump_cont +=1
+
+
+#Funcion para salto multiple
+func multipleJump():
+	#Acción de saltar dos veces
+	if Input.is_action_just_pressed(\"move_jump\") and jump_cont < 5:
+		velocity.y = JUMP_VELOCITY
+		jump_cont +=1
+
+
+# Funcion para movimiento horizontal
+func move_x():
+	var direction := Input.get_axis(\"move_left\", \"move_right\")
+	velocity.x = direction * speed
+
+
+#Funcion para girar sprite en dirección de movimiento
+func flip():
+	if (is_facing_right and velocity.x < 0) or (not is_facing_right and velocity.x > 0):
+		scale.x *= -1
+		is_facing_right = not is_facing_right
+"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kne1u"]
+atlas = ExtResource("1_hrh0a")
+region = Rect2(0, 0, 150, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_e80uo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kne1u")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kpjcp"]
+radius = 19.4165
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = SubResource("GDScript_l1474")
+metadata/_edit_group_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 8.07794e-28)
+scale = Vector2(0.386667, 0.393333)
+sprite_frames = SubResource("SpriteFrames_e80uo")
+flip_h = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 6)
+shape = SubResource("CircleShape2D_kpjcp")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.35, 1.35)
